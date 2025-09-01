@@ -290,7 +290,7 @@ function startGlobalAlertScheduler() {
 // **إضافة كود الاشتراك في الإشعارات هنا**
 function subscribeUserToPush() {
     // يجب الحصول على المفتاح العام من خدمة مثل Firebase
-    const applicationServerKey = 'YOUR_PUBLIC_KEY_HERE';
+    const applicationServerKey = 'BFT2H-0xJ6409nSdj5Ck2erqEe0SyxrZ78mv-I2mYbgVFp0Y6H41982dg6eaxoWUesvQiVQSXqYJZK8-871_19s';
 
     if ('serviceWorker' in navigator && 'PushManager' in window) {
         navigator.serviceWorker.ready.then(function(registration) {
