@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحليلات - تطبيق سكري</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .chart-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chart-container h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .back-button {
+            display: block; 
+            margin-bottom: 20px; 
+            text-decoration: none; 
+            color: #007bff; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">◀️ العودة للرئيسية</a>
+    <div class="container">
+        <h1>📊 التحليلات</h1>
+        <div class="chart-container">
+            <h2>قياسات السكر خلال الأسبوع</h2>
+            <canvas id="sugarLevelChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>متوسط السكر اليومي</h2>
+            <canvas id="dailyAverageChart"></canvas>
+        </div>
+    </div>
+    <script src="main.js"></script>
+    <script src="analytics.js"></script>
+</body>
+</html>

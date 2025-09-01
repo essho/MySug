@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التنبيهات - تطبيق سكري</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        #alertsList {
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
+        .alert-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .alert-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .alert-details span {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .back-button {
+            display: block; 
+            margin-bottom: 20px; 
+            text-decoration: none; 
+            color: #007bff; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">◀️ العودة للرئيسية</a>
+    <div class="container">
+        <h1>🔔 التنبيهات</h1>
+        <h2>إضافة تنبيه جديد</h2>
+        <form id="addAlertForm">
+            <div class="form-group">
+                <label for="alertName">اسم التنبيه:</label>
+                <input type="text" id="alertName" required>
+            </div>
+            <div class="form-group">
+                <label for="alertTime">وقت التنبيه:</label>
+                <input type="time" id="alertTime" required>
+            </div>
+            <div class="form-group">
+                <label for="alertSound">صوت التنبيه:</label>
+                <select id="alertSound">
+                    <option value="default">صوت افتراضي</option>
+                    <option value="sound1">صوت 1</option>
+                    <option value="sound2">صوت 2</option>
+                </select>
+            </div>
+            <button type="submit">إضافة</button>
+        </form>
+        <hr>
+        <h2>التنبيهات الحالية</h2>
+        <ul id="alertsList">
+        </ul>
+    </div>
+    <audio id="alertAudio" src="your-default-sound.mp3"></audio>
+    <script src="alerts.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
