@@ -1,9 +1,11 @@
 {
   "name": "تطبيق سكري",
   "short_name": "سكري",
+  "id": "com.mysug.app",
   "description": "تطبيق لإدارة قياسات السكر والوجبات وجرعات الأنسولين.",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#28a745",
   "icons": [
@@ -17,5 +19,16 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "screenshots": [
+    {
+      "src": "./screenshots/screenshot1.png",
+      "sizes": "640x480",
+      "type": "image/png"
+    }
+  ],
+  "display_override": ["window-controls-overlay"]
 }
