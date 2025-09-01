@@ -20,9 +20,7 @@
       "type": "image/png"
     }
   ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
+  "display_override": ["window-controls-overlay", "edge_side_panel"],
   "screenshots": [
     {
       "src": "./screenshots/screenshot1.png",
@@ -30,5 +28,28 @@
       "type": "image/png"
     }
   ],
-  "display_override": ["window-controls-overlay"]
+  "file_handlers": [
+    {
+      "action": "/open-file",
+      "accept": {
+        "application/json": [".json"]
+      }
+    }
+  ],
+  "handle_links": "auto",
+  "protocol_handlers": [
+    {
+      "protocol": "web+sug",
+      "url": "/app?id=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "name",
+      "text": "description",
+      "url": "link"
+    }
+  }
 }
