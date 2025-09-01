@@ -1,0 +1,20 @@
+{
+  "name": "mysug",
+  "version": "1.0.0",
+  "description": "Essam essho",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'No build step required for this project.'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/essho/MySug.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/essho/MySug/issues"
+  },
+  "homepage": "https://github.com/essho/MySug#readme"
+}
