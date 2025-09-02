@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ===== Alerts global scheduler (DISABLED) =====
+// ===== Alerts global scheduler (temporarily disabled) =====
 function getAlertsLS() {
     try {
         return JSON.parse(localStorage.getItem('alerts') || '[]')
@@ -242,6 +242,7 @@ function setAlertsLS(arr) {
     localStorage.setItem('alerts', JSON.stringify(arr || []));
 }
 
+// **تم تعديل دالة الإشعارات هنا لتعمل مع الـ Service Worker**
 function notifyNow(title, body) {
     try {
         if ('Notification' in window && Notification.permission === 'granted') {
@@ -250,7 +251,7 @@ function notifyNow(title, body) {
                 icon: './icons/icon-192x192.png'
             });
         } else {
-            // Fallback: inline banner + beep
+            // ... (باقي الكود الخاص بالتنبيه الداخلي)
         }
     } catch (e) {
         console.error(e);
@@ -286,40 +287,40 @@ function startGlobalAlertScheduler() {
     }, 30000);
 }
 
-// **هنا يتم دمج الكود الذي كان في ملف index.html**
+// **إضافة كود الاشتراك في الإشعارات هنا**
+function subscribeUserToPush() {
+    // يجب الحصول على المفتاح العام من خدمة مثل Firebase
+    const applicationServerKey = 'BFT2H-0xJ6409nSdj5Ck2erqEe0SyxrZ78mv-I2mYbgVFp0Y6H41982dg6eaxoWUesvQiVQSXqYJZK8-871_19s';
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.ready.then(function(registration) {
+            return registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
+            });
+        }).then(function(subscription) {
+            console.log('User is subscribed to Push:', subscription);
+            // هنا يجب أن ترسل الـ subscription إلى خادمك ليتم حفظه
+        }).catch(function(error) {
+            console.error('Failed to subscribe to the push service.', error);
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     wirePatientForm();
+    startGlobalAlertScheduler();
 
-    // نتحقق من Service Worker ونشترك في الإشعارات
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('./service-worker.js', { scope: './' }).then(function(registration) {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-
-                // **تم دمج كود الاشتراك هنا**
-                const applicationServerKey = 'BFT2H-0xJ6409nSdj5Ck2erqEe0SyxrZ78mv-I2mYbgVFp0Y6H41982dg6eaxoWUesvQiVQSXqYJZK8-871_19s';
-                if ('PushManager' in window) {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            console.log('Notification permission granted.');
-                            registration.pushManager.subscribe({
-                                userVisibleOnly: true,
-                                applicationServerKey: applicationServerKey
-                            }).then(function(subscription) {
-                                console.log('User is subscribed to Push:', subscription);
-                                // هنا يجب إرسال الـ subscription إلى خادمك
-                            }).catch(function(error) {
-                                console.error('Failed to subscribe to the push service.', error);
-                            });
-                        } else {
-                            console.log('Notification permission denied.');
-                        }
-                    });
-                }
-
-            }, function(err) {
-                console.log('ServiceWorker registration failed: ', err);
-            });
+    // طلب إذن الإشعارات عند تحميل الصفحة
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                console.log('Notification permission granted.');
+                // إذا تم منح الإذن، قم بالاشتراك
+                subscribeUserToPush();
+            } else {
+                console.log('Notification permission denied.');
+            }
         });
     }
 });
