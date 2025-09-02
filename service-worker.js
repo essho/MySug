@@ -53,15 +53,27 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// حدث الإشعارات: يتم عرض الإشعارات للمستخدم
+// **المنطق الجديد للإشعارات من Firebase**
 self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Push Received.');
+  const data = event.data.json();
+  const title = data.notification.title || 'تنبيه';
   const options = {
-    body: event.data.text(),
+    body: data.notification.body || 'حان الوقت الآن.',
     icon: './icons/icon-192x192.png',
-    badge: './icons/icon-512x512.png'
+    data: {
+      url: data.fcmOptions.link || './alerts.html'
+    }
   };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
 
+// **المنطق الجديد للتعامل مع النقر على الإشعار**
+self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Notification click received.');
+  event.notification.close();
+  const urlToOpen = event.notification.data.url;
   event.waitUntil(
-    self.registration.showNotification('تطبيق سكري', options)
+    self.clients.openWindow(urlToOpen)
   );
 });

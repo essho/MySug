@@ -51,15 +51,34 @@
     <div class="container">
         <h1>📊 التحليلات</h1>
         <div class="chart-container">
-            <h2>قياسات السكر خلال الأسبوع</h2>
-            <canvas id="sugarLevelChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <h2>متوسط السكر اليومي</h2>
-            <canvas id="dailyAverageChart"></canvas>
+            <h2>مؤشر السكر والأنسولين</h2>
+            <canvas id="combinedChart"></canvas>
         </div>
     </div>
     <script src="main.js"></script>
     <script src="analytics.js"></script>
+<audio id="alertAudio"></audio>
+<script>
+    function playAlertSound(soundName) {
+        const audio = document.getElementById('alertAudio');
+        if (!audio) {
+            console.error('Audio element not found.');
+            return;
+        }
+        // تأكد من أن هذه المسارات صحيحة
+        switch (soundName) {
+            case 'sound1':
+                audio.src = 'sound1.mp3';
+                break;
+            case 'sound2':
+                audio.src = 'sound2.mp3';
+                break;
+            case 'default':
+            default:
+                audio.src = 'sound.mp3';
+                break;
+        }
+        audio.play().catch(e => console.error("Error playing audio:", e));
+    }
 </body>
 </html>

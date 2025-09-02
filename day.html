@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بيانات اليوم - تطبيق سكري</title>
+    <title>إدخال يومي - تطبيق سكري</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,59 +19,49 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .header {
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .date-navigation {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        .header h1 {
-            margin: 0;
-            color: #333;
-        }
-        .calendar {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .calendar button {
-            background: none;
-            border: 1px solid #ccc;
+        .date-navigation button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
             border-radius: 4px;
-            font-size: 1.2rem;
-            padding: 5px 10px;
             cursor: pointer;
         }
-        #currentDate {
-            font-size: 1.1rem;
+        .date-navigation span {
             font-weight: bold;
+            font-size: 1.2rem;
         }
-        table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
+        .data-table th, .data-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
             text-align: right;
         }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
+        .data-table th {
+            background-color: #eee;
         }
-        td input {
+        .data-table input[type="text"], .data-table input[type="number"] {
             width: 100%;
             border: none;
-            padding: 5px;
-            box-sizing: border-box;
             background: transparent;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #fff;
+            text-align: right;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
         }
         .back-button {
             display: block; 
@@ -80,100 +70,128 @@
             color: #007bff; 
             font-weight: bold;
         }
+        .save-btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .save-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
     <a href="index.html" class="back-button">◀️ العودة للرئيسية</a>
     <div class="container">
-        <div class="header">
-            <h1>إدخال بيانات اليوم</h1>
-            <div class="calendar">
-                <button id="prevDay">◀️ يوم سابق</button>
-                <span id="currentDate"></span>
-                <button id="nextDay">يوم لاحق ▶️</button>
-            </div>
+        <h1>إدخال يومي</h1>
+        <div class="date-navigation">
+            <button id="prevDayBtn">اليوم السابق</button>
+            <span id="currentDate"></span>
+            <button id="nextDayBtn">اليوم التالي</button>
         </div>
-        <table>
-            <thead class="sticky-header">
+        
+        <table class="data-table">
+            <thead>
                 <tr>
-                    <th>الساعة</th>
+                    <th>ساعات اليوم</th>
+                    <th>جرعة الأنسولين (وحدة)</th>
                     <th>الوجبة</th>
-                    <th>كمية الأنسولين</th>
-                    <th>قياس السكر</th>
+                    <th>قياس السكر (mg/dL)</th>
                     <th>ملاحظات</th>
                 </tr>
             </thead>
-            <tbody id="dataBody">
+            <tbody id="dailyTableBody">
             </tbody>
         </table>
-        <button id="saveBtn" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">
-            حفظ البيانات
-        </button>
+
+        <div class="save-btn-container">
+            <button id="saveBtn" class="save-btn">حفظ البيانات</button>
+        </div>
     </div>
+    
+    <audio id="alertAudio"></audio>
+
     <script src="main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const dataBody = document.getElementById('dataBody');
-            const currentDateEl = document.getElementById('currentDate');
-            const prevDayBtn = document.getElementById('prevDay');
-            const nextDayBtn = document.getElementById('nextDay');
+        document.addEventListener('DOMContentLoaded', async () => {
+            const dailyTableBody = document.getElementById('dailyTableBody');
+            const currentDateSpan = document.getElementById('currentDate');
+            const prevDayBtn = document.getElementById('prevDayBtn');
+            const nextDayBtn = document.getElementById('nextDayBtn');
             const saveBtn = document.getElementById('saveBtn');
+            
             let currentDate = new Date();
+
             const formatDate = (date) => {
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                return date.toLocaleDateString('ar-EG', options);
+                return date.toLocaleDateString('ar-SA-u-ca-gregory', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             };
-            const createTable = (data = null) => {
-                dataBody.innerHTML = '';
+
+            const loadDailyData = async (date) => {
+                const formattedDate = date.toISOString().split('T')[0];
+                currentDateSpan.textContent = formatDate(date);
+                const data = await loadData(formattedDate) || Array(24).fill({});
+                renderTable(data);
+            };
+
+            const renderTable = (data) => {
+                dailyTableBody.innerHTML = '';
                 for (let i = 0; i < 24; i++) {
-                    const hour = String(i).padStart(2, '0');
                     const row = document.createElement('tr');
-                    const mealValue = (data && data[i] && data[i].meal) ? data[i].meal : '';
-                    const insulinValue = (data && data[i] && data[i].insulin) ? data[i].insulin : '';
-                    const sugarValue = (data && data[i] && data[i].sugar) ? data[i].sugar : '';
-                    const notesValue = (data && data[i] && data[i].notes) ? data[i].notes : '';
+                    const entry = data[i] || {};
                     row.innerHTML = `
-                        <td>${hour}:00</td>
-                        <td><input type="text" data-type="meal" data-hour="${i}" value="${mealValue}"></td>
-                        <td><input type="number" data-type="insulin" data-hour="${i}" value="${insulinValue}"></td>
-                        <td><input type="number" data-type="sugar" data-hour="${i}" value="${sugarValue}"></td>
-                        <td><input type="text" data-type="notes" data-hour="${i}" value="${notesValue}"></td>
+                        <td>${i.toString().padStart(2, '0')}:00</td>
+                        <td><input type="number" data-type="insulinUnits" value="${entry.insulinUnits || ''}"></td>
+                        <td><input type="text" data-type="meal" value="${entry.meal || ''}"></td>
+                        <td><input type="number" data-type="sugarLevel" value="${entry.sugarLevel || ''}"></td>
+                        <td><input type="text" data-type="notes" value="${entry.notes || ''}"></td>
                     `;
-                    dataBody.appendChild(row);
+                    row.dataset.hour = i;
+                    dailyTableBody.appendChild(row);
                 }
             };
-            const updateView = async () => {
-                const dateString = currentDate.toISOString().slice(0, 10);
-                await openDatabase();
-                const data = await loadData(dateString);
-                currentDateEl.textContent = formatDate(currentDate);
-                createTable(data);
-            };
-            const handleSaveData = async () => {
-                const dateString = currentDate.toISOString().slice(0, 10);
-                const data = {};
-                document.querySelectorAll('#dataBody input').forEach(input => {
-                    const hour = input.dataset.hour;
-                    const type = input.dataset.type;
-                    if (!data[hour]) data[hour] = {};
-                    if (input.value) {
-                        data[hour][type] = input.value;
-                    }
+            
+            const saveDailyData = async () => {
+                const formattedDate = currentDate.toISOString().split('T')[0];
+                const entries = [];
+                const rows = dailyTableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const hour = parseInt(row.dataset.hour);
+                    const inputs = row.querySelectorAll('input');
+                    const entry = {
+                        hour: hour,
+                        insulinUnits: inputs[0].value ? parseInt(inputs[0].value) : null,
+                        meal: inputs[1].value || null,
+                        sugarLevel: inputs[2].value ? parseInt(inputs[2].value) : null,
+                        notes: inputs[3].value || null
+                    };
+                    entries.push(entry);
                 });
-                await saveData(dateString, data);
+                await saveData(formattedDate, entries);
                 alert('تم حفظ البيانات بنجاح!');
             };
-            saveBtn.addEventListener('click', handleSaveData);
+
+            // Navigation buttons
             prevDayBtn.addEventListener('click', () => {
                 currentDate.setDate(currentDate.getDate() - 1);
-                updateView();
+                loadDailyData(currentDate);
             });
+
             nextDayBtn.addEventListener('click', () => {
                 currentDate.setDate(currentDate.getDate() + 1);
-                updateView();
+                loadDailyData(currentDate);
             });
-            updateView();
+            
+            // Save button
+            saveBtn.addEventListener('click', saveDailyData);
+
+            loadDailyData(currentDate);
         });
     </script>
+
 </body>
 </html>

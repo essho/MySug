@@ -117,8 +117,31 @@
         <ul id="alertsList">
         </ul>
     </div>
-    <audio id="alertAudio" src="your-default-sound.mp3"></audio>
+    <audio id="alertAudio" src="sound.mp3"></audio>
     <script src="alerts.js"></script>
   <script src="main.js"></script>
+<audio id="alertAudio"></audio>
+<script>
+    function playAlertSound(soundName) {
+        const audio = document.getElementById('alertAudio');
+        if (!audio) {
+            console.error('Audio element not found.');
+            return;
+        }
+        // تأكد من أن هذه المسارات صحيحة
+        switch (soundName) {
+            case 'sound1':
+                audio.src = 'sound1.mp3';
+                break;
+            case 'sound2':
+                audio.src = 'sound2.mp3';
+                break;
+            case 'default':
+            default:
+                audio.src = 'sound.mp3';
+                break;
+        }
+        audio.play().catch(e => console.error("Error playing audio:", e));
+    }
 </body>
 </html>
