@@ -67,6 +67,30 @@
             background-color: #007bff;
         }
     </style>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxpObyLVfLk6xPgAuF1_KMyg9xKBSWvnE",
+            authDomain: "mysug-ced9a.firebaseapp.com",
+            projectId: "mysug-ced9a",
+            storageBucket: "mysug-ced9a.firebasestorage.app",
+            messagingSenderId: "114514995417",
+            appId: "1:114514995417:web:894922383a51ddfaa936c8",
+            measurementId: "G-2D8LY565CX"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -103,68 +127,14 @@
             <a href="analytics.html" id="analyticsBtn">📊 التحليلات</a>
         </div>
     </div>
-    <script src="main.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const patientForm = document.getElementById('patientForm');
-            
-            async function savePatientData(data) {
-                await openDatabase();
-                const transaction = db.transaction([PATIENT_STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(PATIENT_STORE_NAME);
-                const request = store.put({ id: 'patient', ...data });
-                return new Promise((resolve, reject) => {
-                    request.onsuccess = () => resolve();
-                    request.onerror = (event) => reject(event.target.error);
-                });
-            }
-            async function loadPatientData() {
-                await openDatabase();
-                const transaction = db.transaction([PATIENT_STORE_NAME], 'readonly');
-                const store = transaction.objectStore(PATIENT_STORE_NAME);
-                const request = store.get('patient');
-                return new Promise((resolve, reject) => {
-                    request.onsuccess = (event) => {
-                        const patientData = event.target.result;
-                        if (patientData) {
-                            document.getElementById('name').value = patientData.name || '';
-                            document.getElementById('age').value = patientData.age || '';
-                            document.getElementById('weight').value = patientData.weight || '';
-                            document.getElementById('insulinType').value = patientData.insulinType || '';
-                        }
-                        resolve();
-                    };
-                    request.onerror = (event) => reject(event.target.error);
-                });
-            }
-            patientForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                const patientData = {
-                    name: document.getElementById('name').value,
-                    age: document.getElementById('age').value,
-                    weight: document.getElementById('weight').value,
-                    insulinType: document.getElementById('insulinType').value
-                };
-                await savePatientData(patientData);
-                alert('تم حفظ البيانات بنجاح!');
-            });
-            loadPatientData();
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).then(function(registration) {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    }, function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-                });
-            }
-        });
-    </script>
 
-<div style="margin-top:18px; display:flex; gap:10px;">
-  <button id="backupBtn" style="flex:1; padding:10px; border:none; border-radius:6px; background:#6c757d; color:white; font-weight:bold;">💾 نسخ احتياطي</button>
-  <label for="restoreFile" style="flex:1; padding:10px; border-radius:6px; background:#17a2b8; color:white; font-weight:bold; text-align:center; cursor:pointer;">🔄 استعادة بيانات</label>
-  <input id="restoreFile" type="file" accept=".json" style="display:none;">
-</div>
+    <div style="margin-top:18px; display:flex; gap:10px;">
+        <button id="backupBtn" style="flex:1; padding:10px; border:none; border-radius:6px; background:#6c757d; color:white; font-weight:bold;">💾 نسخ احتياطي</button>
+        <label for="restoreFile" style="flex:1; padding:10px; border-radius:6px; background:#17a2b8; color:white; font-weight:bold; text-align:center; cursor:pointer;">🔄 استعادة بيانات</label>
+        <input id="restoreFile" type="file" accept=".json" style="display:none;">
+    </div>
+    
+    <script src="main.js"></script>
+
 </body>
 </html>
