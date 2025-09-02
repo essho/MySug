@@ -1,170 +1,339 @@
 <!DOCTYPE html>
+
 <html lang="ar" dir="rtl">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>تطبيق سكري</title>
+
     <link rel="manifest" href="./manifest.json">
+
     <style>
+
         body {
+
             font-family: Arial, sans-serif;
+
             margin: 0;
+
             padding: 20px;
+
             text-align: right;
+
             direction: rtl;
+
         }
+
         .container {
+
             max-width: 600px;
+
             margin: auto;
+
             background: #f9f9f9;
+
             padding: 20px;
+
             border-radius: 8px;
+
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
         }
+
         h1, h2 {
+
             color: #333;
+
         }
+
         .input-group {
+
             margin-bottom: 15px;
+
         }
+
         .input-group label {
+
             display: block;
+
             margin-bottom: 5px;
+
             font-weight: bold;
+
         }
+
         .input-group input, .input-group select {
+
             width: 100%;
+
             padding: 8px;
+
             border: 1px solid #ccc;
+
             border-radius: 4px;
+
             box-sizing: border-box;
+
         }
+
         .main-buttons {
+
             display: flex;
+
             justify-content: space-between;
+
             margin-top: 20px;
+
             gap: 10px;
+
         }
+
         .main-buttons a, .main-buttons button {
+
             flex-grow: 1;
+
             padding: 10px 15px;
+
             border: none;
+
             border-radius: 4px;
+
             cursor: pointer;
+
             text-align: center;
+
             text-decoration: none;
+
             color: #fff;
+
             font-weight: bold;
+
         }
+
         #addBtn {
+
             background-color: #28a745;
+
         }
+
         #alertsBtn {
+
             background-color: #ffc107;
+
             color: #333;
+
         }
+
         #analyticsBtn {
+
             background-color: #007bff;
+
         }
+
     </style>
+
 </head>
+
 <body>
+
     <div class="container">
+
         <h1>تطبيق سكري</h1>
+
         <p>أهلاً بك، الرجاء إدخال بياناتك لبدء استخدام التطبيق.</p>
+
         <h2>بيانات المريض</h2>
+
         <form id="patientForm">
+
             <div class="input-group">
+
                 <label for="name">الاسم:</label>
+
                 <input type="text" id="name" name="name" required>
+
             </div>
+
             <div class="input-group">
+
                 <label for="age">العمر:</label>
+
                 <input type="number" id="age" name="age" required>
+
             </div>
+
             <div class="input-group">
+
                 <label for="weight">الوزن (كجم):</label>
+
                 <input type="number" id="weight" name="weight" required>
+
             </div>
+
             <div class="input-group">
+
                 <label for="insulinType">نوع الأنسولين:</label>
+
                 <select id="insulinType" name="insulinType" required>
+
                     <option value="">اختر نوع الأنسولين</option>
+
                     <option value="long-acting">طويل المفعول</option>
+
                     <option value="short-acting">قصير المفعول</option>
+
                     <option value="mixed">مختلط</option>
+
                 </select>
+
             </div>
+
             <button type="submit" style="display: none;"></button>
+
         </form>
+
         <div class="main-buttons">
+
             <a href="day.html" id="addBtn">+ إضافة</a>
+
             <a href="alerts.html" id="alertsBtn">🔔 التنبيهات</a>
+
             <a href="analytics.html" id="analyticsBtn">📊 التحليلات</a>
+
         </div>
+
     </div>
+
     <script src="main.js"></script>
+
     <script>
+
         document.addEventListener('DOMContentLoaded', async () => {
+
             const patientForm = document.getElementById('patientForm');
+
             
+
             async function savePatientData(data) {
+
                 await openDatabase();
+
                 const transaction = db.transaction([PATIENT_STORE_NAME], 'readwrite');
+
                 const store = transaction.objectStore(PATIENT_STORE_NAME);
+
                 const request = store.put({ id: 'patient', ...data });
+
                 return new Promise((resolve, reject) => {
+
                     request.onsuccess = () => resolve();
+
                     request.onerror = (event) => reject(event.target.error);
+
                 });
+
             }
+
             async function loadPatientData() {
+
                 await openDatabase();
+
                 const transaction = db.transaction([PATIENT_STORE_NAME], 'readonly');
+
                 const store = transaction.objectStore(PATIENT_STORE_NAME);
+
                 const request = store.get('patient');
+
                 return new Promise((resolve, reject) => {
+
                     request.onsuccess = (event) => {
+
                         const patientData = event.target.result;
+
                         if (patientData) {
+
                             document.getElementById('name').value = patientData.name || '';
+
                             document.getElementById('age').value = patientData.age || '';
+
                             document.getElementById('weight').value = patientData.weight || '';
+
                             document.getElementById('insulinType').value = patientData.insulinType || '';
+
                         }
+
                         resolve();
+
                     };
+
                     request.onerror = (event) => reject(event.target.error);
+
                 });
+
             }
+
             patientForm.addEventListener('submit', async function(event) {
+
                 event.preventDefault();
+
                 const patientData = {
+
                     name: document.getElementById('name').value,
+
                     age: document.getElementById('age').value,
+
                     weight: document.getElementById('weight').value,
+
                     insulinType: document.getElementById('insulinType').value
+
                 };
+
                 await savePatientData(patientData);
+
                 alert('تم حفظ البيانات بنجاح!');
+
             });
+
             loadPatientData();
+
             if ('serviceWorker' in navigator) {
+
                 window.addEventListener('load', function() {
+
                     navigator.serviceWorker.register('./service-worker.js', { scope: './' }).then(function(registration) {
+
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
                     }, function(err) {
+
                         console.log('ServiceWorker registration failed: ', err);
+
                     });
+
                 });
+
             }
+
         });
+
     </script>
 
+
+
 <div style="margin-top:18px; display:flex; gap:10px;">
+
   <button id="backupBtn" style="flex:1; padding:10px; border:none; border-radius:6px; background:#6c757d; color:white; font-weight:bold;">💾 نسخ احتياطي</button>
+
   <label for="restoreFile" style="flex:1; padding:10px; border-radius:6px; background:#17a2b8; color:white; font-weight:bold; text-align:center; cursor:pointer;">🔄 استعادة بيانات</label>
+
   <input id="restoreFile" type="file" accept=".json" style="display:none;">
+
 </div>
+
 </body>
+
 </html>
