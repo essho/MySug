@@ -39,9 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     alertsList.addEventListener('click', async (e) => {
         if (e.target.classList.contains('delete-btn')) {
+            e.stopPropagation(); // هذا السطر يوقف انتشار الحدث
             const id = parseInt(e.target.dataset.id);
-            // يجب إضافة دالة حذف من IndexedDB
-            // await deleteAlertLocally(id);
+            await deleteAlertLocally(id);
             renderAlerts();
             syncAlertsWithServer();
         }

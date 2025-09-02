@@ -54,6 +54,13 @@
         .data-table th {
             background-color: #eee;
         }
+        /* تعديل عرض الأعمدة هنا */
+        .data-table td:nth-child(1), .data-table th:nth-child(1) { width: 15%; }
+        .data-table td:nth-child(2), .data-table th:nth-child(2) { width: 15%; }
+        .data-table td:nth-child(3), .data-table th:nth-child(3) { width: 25%; }
+        .data-table td:nth-child(4), .data-table th:nth-child(4) { width: 15%; }
+        .data-table td:nth-child(5), .data-table th:nth-child(5) { width: 30%; }
+
         .data-table input[type="text"], .data-table input[type="number"] {
             width: 100%;
             border: none;
@@ -113,8 +120,6 @@
             <button id="saveBtn" class="save-btn">حفظ البيانات</button>
         </div>
     </div>
-    
-    <audio id="alertAudio"></audio>
 
     <script src="main.js"></script>
     <script>
@@ -192,6 +197,5 @@
             loadDailyData(currentDate);
         });
     </script>
-
 </body>
 </html>

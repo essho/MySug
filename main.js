@@ -251,6 +251,17 @@ async function saveAlertLocally(alert) {
     });
 }
 
+async function deleteAlertLocally(id) {
+    await openDatabase();
+    const transaction = db.transaction([ALERTS_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(ALERTS_STORE_NAME);
+    const request = store.delete(id);
+    return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve();
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
+
 async function loadAlertsLocally() {
     await openDatabase();
     const transaction = db.transaction([ALERTS_STORE_NAME], 'readonly');
@@ -265,7 +276,6 @@ async function loadAlertsLocally() {
 async function syncAlertsWithServer() {
     const alerts = await loadAlertsLocally();
     if (alerts.length > 0) {
-        // يمكنك إرسال جميع التنبيهات دفعة واحدة إلى الخادم
         try {
             const response = await fetch('YOUR_FIREBASE_CLOUD_FUNCTION_URL_TO_SYNC_ALERTS', {
                 method: 'POST',
@@ -321,7 +331,6 @@ function playSound(soundName) {
     audio.play().catch(e => console.error("Error playing audio:", e));
 }
 
-// Global scheduler to run alerts locally
 let _alertTimer = null;
 function startGlobalAlertScheduler() {
     clearInterval(_alertTimer);
@@ -334,9 +343,8 @@ function startGlobalAlertScheduler() {
             const dt = new Date();
             dt.setHours(h || 0, m || 0, 0, 0);
 
-            if (dt.getTime() > now) return; // Not time yet
+            if (dt.getTime() > now) return;
 
-            // Check if this alert was already triggered today
             const lastTrigger = localStorage.getItem(`alert-last-trigger-${a.id}`);
             const today = new Date().toDateString();
 
@@ -349,11 +357,10 @@ function startGlobalAlertScheduler() {
                 localStorage.setItem(`alert-last-trigger-${a.id}`, today);
             }
         });
-    }, 30000); // Check every 30 seconds
+    }, 30000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // This is for index.html functionality
     const patientForm = document.getElementById('patientForm');
     if (patientForm) {
         wirePatientForm();
@@ -365,11 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const alertsPage = document.getElementById('alertsList');
     if (alertsPage) {
-        // This is for alerts.html functionality
         // Handled by alerts.js now
     }
     
-    // Request notification permission and subscribe
     requestNotificationPermissionAndSubscribe();
     startGlobalAlertScheduler();
     window.addEventListener('online', syncAlertsWithServer);
