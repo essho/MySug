@@ -93,8 +93,6 @@
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-button">◀️ العودة للرئيسية</a>
-    <div class="container">
         <h1>إدخال يومي</h1>
         <div class="date-navigation">
             <button id="prevDayBtn">اليوم السابق</button>
@@ -197,5 +195,13 @@
             loadDailyData(currentDate);
         });
     </script>
+	<a href="./index.html" class="back-fab" aria-label="العودة للرئيسية">⌂</a>
+<style>
+  .back-fab{
+    position:fixed;left:16px;bottom:16px;width:44px;height:44px;line-height:44px;
+    text-align:center;border-radius:50%;background:#fff;border:1px solid #ddd;
+    text-decoration:none;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:9999
+  }
+</style>
 </body>
 </html>

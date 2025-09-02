@@ -1,3 +1,5 @@
+// Local-only edition: server/push code removed
+
 // الدوال الأساسية لإدارة البيانات
 const DB_NAME = 'diabetesAppDB';
 const DB_VERSION = 2;
@@ -130,10 +132,7 @@ async function saveData(date, data) {
     const database = await openDatabase();
     const transaction = database.transaction([DAILY_STORE_NAME], 'readwrite');
     const store = transaction.objectStore(DAILY_STORE_NAME);
-    const request = store.put({
-        date: date,
-        data: data
-    });
+    const request = store.put({ date: date, data: data });
     return new Promise((resolve, reject) => {
         request.onsuccess = () => resolve();
         request.onerror = (event) => reject(event.target.error);
@@ -160,9 +159,7 @@ async function loadAllData() {
     const store = transaction.objectStore(DAILY_STORE_NAME);
     const request = store.getAll();
     return new Promise((resolve, reject) => {
-        request.onsuccess = (event) => {
-            resolve(event.target.result);
-        };
+        request.onsuccess = (event) => resolve(event.target.result);
         request.onerror = (event) => reject(event.target.error);
     });
 }
@@ -171,13 +168,10 @@ async function loadAllData() {
 async function exportAllData() {
     const database = await openDatabase();
     const dump = {
-        meta: {
-            exportedAt: new Date().toISOString(),
-            dbName: DB_NAME,
-            version: DB_VERSION
-        },
+        meta: { exportedAt: new Date().toISOString(), dbName: DB_NAME, version: DB_VERSION },
         stores: {}
     };
+    // daily
     dump.stores[DAILY_STORE_NAME] = await new Promise((resolve, reject) => {
         const tx = database.transaction([DAILY_STORE_NAME], 'readonly');
         const st = tx.objectStore(DAILY_STORE_NAME);
@@ -185,6 +179,7 @@ async function exportAllData() {
         req.onsuccess = e => resolve(e.target.result || []);
         req.onerror = e => reject(e.target.error);
     });
+    // patient
     dump.stores[PATIENT_STORE_NAME] = await new Promise((resolve, reject) => {
         const tx = database.transaction([PATIENT_STORE_NAME], 'readonly');
         const st = tx.objectStore(PATIENT_STORE_NAME);
@@ -192,18 +187,14 @@ async function exportAllData() {
         req.onsuccess = e => resolve(e.target.result || []);
         req.onerror = e => reject(e.target.error);
     });
+    // alerts (local mirrors)
     dump.alerts = getAlertsLS();
     dump.patientLocal = getPatientLS();
-    const blob = new Blob([JSON.stringify(dump, null, 2)], {
-        type: 'application/json;charset=utf-8'
-    });
+    const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'diabetes_backup.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = url; a.download = 'diabetes_backup.json';
+    document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
 }
 
@@ -239,6 +230,16 @@ async function importAllData(file) {
 }
 
 // ===== Alerts & Push Notifications Logic (Hybrid System) =====
+// (محلي فقط الآن)
+
+function getAlertsLS() {
+  try { return JSON.parse(localStorage.getItem('alertsLocal') || '[]'); }
+  catch(_) { return []; }
+}
+function setAlertsLS(list) {
+  try { localStorage.setItem('alertsLocal', JSON.stringify(list || [])); }
+  catch(_) {}
+}
 
 async function saveAlertLocally(alert) {
     await openDatabase();
@@ -273,60 +274,15 @@ async function loadAlertsLocally() {
     });
 }
 
-async function syncAlertsWithServer() {
-    const alerts = await loadAlertsLocally();
-    if (alerts.length > 0) {
-        try {
-            const response = await fetch('YOUR_FIREBASE_CLOUD_FUNCTION_URL_TO_SYNC_ALERTS', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(alerts)
-            });
-            const result = await response.json();
-            console.log('Alerts synced with server:', result);
-        } catch (error) {
-            console.error('Failed to sync alerts with server:', error);
-        }
-    }
-}
-
-async function requestNotificationPermissionAndSubscribe() {
-    if ('Notification' in window) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            console.log('Notification permission granted.');
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                try {
-                    const registration = await navigator.serviceWorker.ready;
-                    const subscription = await registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: 'YOUR_FIREBASE_VAPID_KEY_HERE'
-                    });
-                    console.log('User subscribed to push:', subscription.toJSON());
-                } catch (error) {
-                    console.error('Failed to subscribe:', error);
-                }
-            }
-        } else {
-            console.log('Notification permission denied.');
-        }
-    }
-}
-
+// تشغيل تنبيهات داخلية عندما الصفحة نشطة فقط
 function playSound(soundName) {
     const audio = document.getElementById('alertAudio');
     if (!audio) return;
     switch (soundName) {
-        case 'sound1':
-            audio.src = 'sound1.mp3';
-            break;
-        case 'sound2':
-            audio.src = 'sound2.mp3';
-            break;
+        case 'sound1': audio.src = 'sound1.mp3'; break;
+        case 'sound2': audio.src = 'sound2.mp3'; break;
         case 'default':
-        default:
-            audio.src = 'sound.mp3';
-            break;
+        default: audio.src = 'sound.mp3'; break;
     }
     audio.play().catch(e => console.error("Error playing audio:", e));
 }
@@ -342,17 +298,18 @@ function startGlobalAlertScheduler() {
             const [h, m] = (a.time || '00:00').split(':').map(Number);
             const dt = new Date();
             dt.setHours(h || 0, m || 0, 0, 0);
-
             if (dt.getTime() > now) return;
 
             const lastTrigger = localStorage.getItem(`alert-last-trigger-${a.id}`);
             const today = new Date().toDateString();
-
             if (lastTrigger !== today) {
-                new Notification(a.name || 'تنبيه سكر', {
+                // إشعار داخل الصفحة فقط (بدون Push)
+                try {
+                  new Notification(a.name || 'تنبيه سكر', {
                     body: `حان وقت ${a.name} الآن.`,
                     icon: './icons/icon-192x192.png'
-                });
+                  });
+                } catch(_) {}
                 playSound(a.sound);
                 localStorage.setItem(`alert-last-trigger-${a.id}`, today);
             }
@@ -362,21 +319,22 @@ function startGlobalAlertScheduler() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const patientForm = document.getElementById('patientForm');
-    if (patientForm) {
-        wirePatientForm();
-    }
+    if (patientForm) wirePatientForm();
+
     const backupBtn = document.getElementById('backupBtn');
     const restoreFile = document.getElementById('restoreFile');
     if (backupBtn) backupBtn.addEventListener('click', () => exportAllData());
     if (restoreFile) restoreFile.addEventListener('change', (e) => e.target.files?.[0] && importAllData(e.target.files[0]));
 
-    const alertsPage = document.getElementById('alertsList');
-    if (alertsPage) {
-        // Handled by alerts.js now
-    }
-    
-    requestNotificationPermissionAndSubscribe();
+    // لا يوجد أي اشتراك Push أو مزامنة سيرفر الآن
     startGlobalAlertScheduler();
-    window.addEventListener('online', syncAlertsWithServer);
-    syncAlertsWithServer();
+
+    // تسجيل Service Worker إن وُجد (لأجل الأوفلاين فقط)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
 });
