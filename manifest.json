@@ -30,7 +30,7 @@
   ],
   "file_handlers": [
     {
-      "action": "/open-file",
+      "action": "./open-file.html",
       "accept": {
         "application/json": [".json"]
       }
@@ -40,11 +40,11 @@
   "protocol_handlers": [
     {
       "protocol": "web+sug",
-      "url": "/app?id=%s"
+      "url": "./app?id=%s"
     }
   ],
   "share_target": {
-    "action": "/share",
+    "action": "./share.html",
     "method": "GET",
     "params": {
       "title": "name",
