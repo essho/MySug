@@ -82,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const alertId = await saveAlertLocally(newAlert);
     newAlert.id = alertId;
+    alert('تم إضافة التنبيه بنجاح!');
     renderAlerts();
     addAlertForm.reset();
-    alert('تم إضافة التنبيه بنجاح!');
   });
 
   alertsList.addEventListener('click', async (e) => {
